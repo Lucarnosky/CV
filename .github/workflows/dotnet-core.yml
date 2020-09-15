@@ -1,0 +1,35 @@
+name: .NET Core
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Publish
+      run: dotnet publish CV.csproj
+    - name: GitHub Pages action
+      if: ${{ github.ref == 'refs/heads/master' }} # Publish only when the push is on master
+      uses: peaceiris/actions-gh-pages@v3.6.1
+      with:
+        github_token: ${{ secrets.PUBLISH_TOKEN }}
+        publish_branch: gh-pages
+        publish_dir: bin/Release/netstandard2.1/publish/wwwroot
+        allow_empty_commit: false
+        keep_files: false
+        force_orphan: true
